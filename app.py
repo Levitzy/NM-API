@@ -21,23 +21,40 @@ def format_decrypted_content(decrypted_text):
     try:
         # Attempt to parse the decrypted text as JSON
         data = json.loads(decrypted_text)
+
+        # Initialize an empty string to store the formatted text
         formatted_text = ""
+
+        # Iterate through the key-value pairs in the JSON data
         for key, value in data.items():
+            # Check if the value is a dictionary
             if isinstance(value, dict):
+                # If it's a dictionary, iterate through its key-value pairs
                 for sub_key, sub_value in value.items():
+                    # Add the sub_key and sub_value to the formatted text with a newline
                     formatted_text += f"{sub_key} {sub_value}\n"
+            # Check if the value is a list
             elif isinstance(value, list):
+                # If it's a list, iterate through its items
                 for item in value:
+                    # Check if the item is a dictionary
                     if isinstance(item, dict):
+                        # If it's a dictionary, iterate through its key-value pairs
                         for sub_key, sub_value in item.items():
+                            # Add the sub_key and sub_value to the formatted text with a newline
                             formatted_text += f"{sub_key} {sub_value}\n"
+                    # If the item is not a dictionary, add the key and item to the formatted text with a newline
                     else:
                         formatted_text += f"{key} {item}\n"
+            # If the value is not a dictionary or a list, add the key and value to the formatted text with a newline
             else:
                 formatted_text += f"{key} {value}\n"
+
+        # Return the formatted text
         return formatted_text
+
     except json.JSONDecodeError:
-        # If not JSON, return the original decrypted text
+        # If the decrypted text is not valid JSON, return the original decrypted text as a string
         return decrypted_text.decode('utf-8')
 
 # API route to decrypt content from query parameter
@@ -56,10 +73,13 @@ def decrypt_latest():
         # Format the decrypted content
         formatted_text = format_decrypted_content(decrypted_text)
 
+        # Return the JSON response with both the original and formatted decrypted content
         return jsonify({
             "message": Ezxx + formatted_text,
-            "decrypted_content": formatted_text
+            "decrypted_content": decrypted_text.decode('utf-8'),  # Original decrypted content
+            "beautiful_decrypted_content": formatted_text  # Formatted decrypted content
         }), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
